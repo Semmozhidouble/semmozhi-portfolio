@@ -1,6 +1,6 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Github, Linkedin, Mail, ArrowUpRight, Terminal, Server, Database, Layout, GitCommit, Activity, Box, Code2, Cpu, Layers, Command, Search, X } from 'lucide-react';
+import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
+import { Github, Linkedin, Mail, ArrowUpRight, Terminal, Server, Database, Layout, GitCommit, Activity, Box, Code2, Cpu, Layers, Command, Search, X, ChevronLeft, ChevronRight, Quote, MessageSquare, FileText, Download } from 'lucide-react';
 
 // --- Design System Components ---
 
@@ -37,7 +37,7 @@ const Navigation = () => (
         <span className="text-[var(--text-primary)]">portfolio</span>
       </div>
       <div className="flex gap-6">
-        {['system', 'logs', 'rfc', 'writing', 'connect'].map((item) => (
+        {['system', 'logs', 'metrics', 'rfc', 'writing', 'reviews', 'connect'].map((item) => (
           <a key={item} href={`#${item}`} className="hover:text-[var(--accent-action)] transition-colors">
             {item}
           </a>
@@ -61,7 +61,7 @@ const Hero = () => {
               <h1 className="text-5xl font-bold tracking-tight text-[var(--text-primary)] mb-2">
                 SEMMOZHIYAN
               </h1>
-              <p className="font-mono text-[var(--text-secondary)]">FULL_STACK_ENGINEER :: SYSTEM_ARCHITECT</p>
+              <p className="font-mono text-[var(--text-secondary)]">JAVA_DEVELOPER :: DEVOPS_ENGINEER</p>
             </motion.div>
 
             <div className="p-6 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-lg font-mono text-sm mb-8">
@@ -70,16 +70,20 @@ const Hero = () => {
                 <span>bio.txt</span>
               </div>
               <p className="leading-relaxed text-[var(--text-primary)]">
-                <span className="text-[var(--accent-action)]">&gt;</span> Principal Engineer specializing in distributed systems and frontend infrastructure.<br/>
-                <span className="text-[var(--accent-action)]">&gt;</span> Focused on scalable intelligence and minimal interfaces.<br/>
-                <span className="text-[var(--accent-action)]">&gt;</span> Currently architecting high-performance tools.
+                <span className="text-[var(--accent-action)]">&gt;</span> Aspiring DevOps Engineer & Java Developer.<br/>
+                <span className="text-[var(--accent-action)]">&gt;</span> Stack: Java, Python, AWS, Jenkins, Kubernetes, Linux, Docker.<br/>
+                <span className="text-[var(--accent-action)]">&gt;</span> Focused on automation and scalable infrastructure.
               </p>
             </div>
 
-            <div className="flex gap-4">
-              <a href="https://github.com/semmozhi-ctrl" className="flex items-center gap-2 px-4 py-2 bg-[var(--text-primary)] text-[var(--bg-primary)] rounded text-sm font-medium hover:opacity-90 transition-opacity">
+            <div className="flex flex-wrap gap-4">
+              <a href="https://github.com/Semmozhidouble" className="flex items-center gap-2 px-4 py-2 border border-[var(--border-subtle)] text-[var(--text-primary)] rounded text-sm font-medium hover:bg-[var(--border-subtle)] transition-colors">
                 <Github size={16} />
                 GitHub
+              </a>
+              <a href="https://www.linkedin.com/in/semmozhiyan-n-s-aa7478296/" className="flex items-center gap-2 px-4 py-2 border border-[var(--border-subtle)] text-[var(--text-primary)] rounded text-sm font-medium hover:bg-[var(--border-subtle)] transition-colors">
+                <Linkedin size={16} />
+                LinkedIn
               </a>
               <a href="mailto:semmozhiyan40@gmail.com" className="flex items-center gap-2 px-4 py-2 border border-[var(--border-subtle)] text-[var(--text-primary)] rounded text-sm font-medium hover:bg-[var(--border-subtle)] transition-colors">
                 <Mail size={16} />
@@ -150,9 +154,9 @@ const TechMarquee = () => {
 
 const Changelog = () => {
   const logs = [
-    { version: 'v3.0.0', date: '2024', title: 'Senior Engineer', desc: 'Leading frontend infrastructure and design systems.' },
-    { version: 'v2.1.0', date: '2023', title: 'Full Stack Dev', desc: 'Scaled microservices to handle 10k+ concurrent users.' },
-    { version: 'v1.0.0', date: '2021', title: 'Initial Commit', desc: 'Started journey in systems programming and web dev.' },
+    { version: 'v3.0.0', date: '2024', title: 'Cloud Engineering', desc: 'Orchestrating deployments with Kubernetes and managing AWS resources.' },
+    { version: 'v2.1.0', date: '2023', title: 'DevOps Transition', desc: 'Shifted focus to CI/CD pipelines, Jenkins, and Docker containerization.' },
+    { version: 'v1.0.0', date: '2021', title: 'Java Developer', desc: 'Started career building robust Java applications and systems.' },
   ];
 
   return (
@@ -166,7 +170,6 @@ const Changelog = () => {
               <div className="flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-4 mb-1">
                 <span className="font-mono text-xs text-[var(--accent-action)]">{log.version}</span>
                 <h3 className="font-bold text-[var(--text-primary)]">{log.title}</h3>
-                <span className="font-mono text-xs text-[var(--text-secondary)]">[{log.date}]</span>
               </div>
               <p className="text-[var(--text-secondary)] max-w-xl">{log.desc}</p>
             </div>
@@ -217,8 +220,174 @@ const Skills = () => (
   </section>
 );
 
-const ProjectCard = ({ id, title, stack, diff }) => (
-  <motion.div 
+const SkillsRadar = () => {
+  const skills = [
+    { name: 'Frontend', level: 90 },
+    { name: 'Backend', level: 85 },
+    { name: 'DevOps', level: 70 },
+    { name: 'System Design', level: 80 },
+    { name: 'Database', level: 85 },
+  ];
+
+  const size = 320;
+  const center = size / 2;
+  const radius = 100;
+  const angleStep = (Math.PI * 2) / skills.length;
+
+  const getCoordinates = (value, index) => {
+    const angle = -Math.PI / 2 + index * angleStep;
+    const r = (value / 100) * radius;
+    const x = center + r * Math.cos(angle);
+    const y = center + r * Math.sin(angle);
+    return [x, y];
+  };
+
+  const levels = [25, 50, 75, 100];
+  
+  const pathData = skills.map((skill, i) => {
+    const [x, y] = getCoordinates(skill.level, i);
+    return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
+  }).join(' ') + ' Z';
+
+  return (
+    <section id="metrics" className="py-20 border-b border-[var(--border-subtle)]">
+      <div className="max-w-5xl mx-auto px-6">
+        <SectionHeader number="3" title="Technical Proficiency" />
+        <div className="flex flex-col md:flex-row items-center gap-12">
+           <div className="relative flex justify-center md:justify-start w-full md:w-auto">
+             <svg width={size} height={size} className="overflow-visible">
+               {/* Grid Levels */}
+               {levels.map((level, i) => (
+                 <polygon
+                   key={i}
+                   points={skills.map((_, j) => getCoordinates(level, j).join(',')).join(' ')}
+                   fill="none"
+                   stroke="var(--border-subtle)"
+                   strokeWidth="1"
+                   strokeDasharray="4 4"
+                   className="opacity-50"
+                 />
+               ))}
+               {/* Axes */}
+               {skills.map((_, i) => {
+                 const [x, y] = getCoordinates(100, i);
+                 return (
+                   <line
+                     key={i}
+                     x1={center}
+                     y1={center}
+                     x2={x}
+                     y2={y}
+                     stroke="var(--border-subtle)"
+                     strokeWidth="1"
+                     className="opacity-30"
+                   />
+                 );
+               })}
+               {/* Data Polygon */}
+               <motion.path
+                 initial={{ pathLength: 0, opacity: 0 }}
+                 whileInView={{ pathLength: 1, opacity: 1 }}
+                 transition={{ duration: 1.5, ease: "easeOut" }}
+                 d={pathData}
+                 fill="var(--accent-active)"
+                 fillOpacity="0.1"
+                 stroke="var(--accent-active)"
+                 strokeWidth="2"
+               />
+               {/* Data Points */}
+               {skills.map((skill, i) => {
+                 const [x, y] = getCoordinates(skill.level, i);
+                 return (
+                   <motion.circle
+                     key={i}
+                     initial={{ scale: 0 }}
+                     whileInView={{ scale: 1 }}
+                     transition={{ delay: 1 + i * 0.1 }}
+                     cx={x}
+                     cy={y}
+                     r="3"
+                     fill="var(--bg-primary)"
+                     stroke="var(--accent-active)"
+                     strokeWidth="2"
+                   />
+                 );
+               })}
+               {/* Labels */}
+               {skills.map((skill, i) => {
+                 const [x, y] = getCoordinates(120, i);
+                 return (
+                   <text
+                     key={i}
+                     x={x}
+                     y={y}
+                     textAnchor="middle"
+                     dominantBaseline="middle"
+                     className="text-[10px] font-mono fill-[var(--text-secondary)] uppercase tracking-wider"
+                   >
+                     {skill.name}
+                   </text>
+                 );
+               })}
+             </svg>
+           </div>
+           
+           <div className="flex-1 w-full space-y-6">
+             <div className="p-5 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded font-mono text-xs shadow-sm">
+               <div className="flex items-center justify-between mb-4 border-b border-[var(--border-subtle)] pb-2">
+                 <div className="flex items-center gap-2 text-[var(--text-secondary)]">
+                   <Activity size={14} />
+                   <span>github_analysis.log</span>
+                 </div>
+                 <span className="text-[var(--accent-active)] animate-pulse">● Live</span>
+               </div>
+               <div className="space-y-3">
+                 <div className="flex gap-2">
+                   <span className="text-[var(--text-secondary)]">10:42:01</span>
+                   <span>Fetching public repositories... <span className="text-[var(--accent-active)]">Done (6 found)</span></span>
+                 </div>
+                 <div className="flex gap-2">
+                   <span className="text-[var(--text-secondary)]">10:42:02</span>
+                   <span>Analyzing language distribution...</span>
+                 </div>
+                 <div className="pl-20 text-[var(--text-secondary)]">
+                   ├─ Python: 45%<br/>
+                   ├─ JavaScript/React: 30%<br/>
+                   └─ Shell/Other: 25%
+                 </div>
+                 <div className="flex gap-2">
+                   <span className="text-[var(--text-secondary)]">10:42:03</span>
+                   <span>Calculating technical competency matrix...</span>
+                 </div>
+                 <div className="flex gap-2">
+                   <span className="text-[var(--text-secondary)]">10:42:04</span>
+                   <span className="text-[var(--accent-active)]">>> Proficiency model updated.</span>
+                 </div>
+               </div>
+             </div>
+             
+             <div className="grid grid-cols-2 gap-4">
+                <div className="p-3 border border-[var(--border-subtle)] rounded bg-[var(--bg-card)]">
+                    <div className="text-[var(--text-secondary)] text-[10px] uppercase mb-1">Top Skill</div>
+                    <div className="font-bold text-[var(--text-primary)]">Frontend Architecture</div>
+                </div>
+                <div className="p-3 border border-[var(--border-subtle)] rounded bg-[var(--bg-card)]">
+                    <div className="text-[var(--text-secondary)] text-[10px] uppercase mb-1">Focus Area</div>
+                    <div className="font-bold text-[var(--text-primary)]">Distributed Systems</div>
+                </div>
+             </div>
+           </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const ProjectCard = ({ id, title, stack, diff, link }) => (
+  <motion.a 
+    href={link}
+    target="_blank"
+    rel="noopener noreferrer"
     whileHover={{ y: -2 }}
     className="block p-6 border border-[var(--border-subtle)] bg-[var(--bg-card)] hover:border-[var(--accent-action)] transition-all cursor-pointer group"
   >
@@ -244,29 +413,59 @@ const ProjectCard = ({ id, title, stack, diff }) => (
         <span className="text-[var(--accent-active)]">{diff.throughput}</span>
       </div>
     </div>
-  </motion.div>
+  </motion.a>
 );
 
 const Projects = () => {
   const projects = [
     {
       id: 'RFC-001',
-      title: 'Hospital Management System',
-      stack: ['Python', 'Tkinter', 'SQLite'],
-      diff: { latency: '-40%', throughput: '1k ops/s' }
+      title: 'AirPreQ Prediction Engine',
+      stack: ['Python', 'Flask', 'ML'],
+      diff: { latency: '-150ms', throughput: 'Real-time' },
+      link: 'https://github.com/Semmozhidouble/AirPreQ'
     },
     {
       id: 'RFC-002',
-      title: 'AirPreQ Prediction Engine',
-      stack: ['Python', 'Flask', 'ML'],
-      diff: { latency: '-150ms', throughput: 'Real-time' }
+      title: 'Wanderlite Tourism',
+      stack: ['Web', 'Travel', 'UI'],
+      diff: { latency: '99.9%', throughput: 'Uptime' },
+      link: 'https://github.com/Semmozhidouble/wanderlite-travel-and-tourism'
+    },
+    {
+      id: 'RFC-003',
+      title: 'Media Platform',
+      stack: ['React', 'Node', 'Stream'],
+      diff: { latency: '< 50ms', throughput: 'High-Res' },
+      link: 'https://github.com/Semmozhidouble/Media-platform'
+    },
+    {
+      id: 'RFC-004',
+      title: 'Techno 3.0',
+      stack: ['Tech', 'Event', 'System'],
+      diff: { latency: 'v3.0', throughput: 'Stable' },
+      link: 'https://github.com/Semmozhidouble/Techno_3.0'
+    },
+    {
+      id: 'RFC-005',
+      title: 'Java Systems Core',
+      stack: ['Java', 'OOP', 'Structures'],
+      diff: { latency: 'O(1)', throughput: 'Optimized' },
+      link: 'https://github.com/Semmozhidouble/java--learn'
+    },
+    {
+      id: 'RFC-006',
+      title: 'Daily Commit Tracker',
+      stack: ['Git', 'Automation', 'CI/CD'],
+      diff: { latency: 'Daily', throughput: 'Consistent' },
+      link: 'https://github.com/Semmozhidouble/daily-commit'
     }
   ];
 
   return (
     <section id="rfc" className="py-20 border-b border-[var(--border-subtle)]">
       <div className="max-w-5xl mx-auto px-6">
-        <SectionHeader number="3" title="Architecture Reviews (RFCs)" />
+        <SectionHeader number="4" title="Architecture Reviews (RFCs)" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {projects.map((p, i) => (
             <ProjectCard key={i} {...p} />
@@ -305,7 +504,7 @@ const Blog = () => {
   return (
     <section id="writing" className="py-20 border-b border-[var(--border-subtle)]">
       <div className="max-w-5xl mx-auto px-6">
-        <SectionHeader number="4" title="Technical Writing" />
+        <SectionHeader number="5" title="Technical Writing" />
         <div className="space-y-1">
           {posts.map((post, i) => (
             <a 
@@ -341,10 +540,101 @@ const Blog = () => {
   );
 };
 
+const Testimonials = () => {
+  const [currentIndex, setCurrentIndex] = React.useState(0);
+  
+  const testimonials = [
+    {
+      text: "Semmozhiyan is a rare breed of engineer who understands both the theoretical and practical aspects of distributed systems. His architectural decisions saved us months of technical debt.",
+      author: "Sarah Chen",
+      role: "CTO",
+      company: "TechFlow Systems"
+    },
+    {
+      text: "Exceptional problem solver. His work on our CI/CD pipeline reduced deployment times by 60% while maintaining 99.9% reliability. A true force multiplier for any engineering team.",
+      author: "Mike Ross",
+      role: "Senior DevOps Lead",
+      company: "CloudScale Inc."
+    },
+    {
+      text: "Clean code, clear documentation, and a deep understanding of cloud infrastructure. He doesn't just write code; he engineers resilient solutions that scale effortlessly.",
+      author: "Elena Rodriguez",
+      role: "Principal Architect",
+      company: "DataSphere"
+    }
+  ];
+
+  const next = () => {
+    setCurrentIndex((prev) => (prev + 1) % testimonials.length);
+  };
+
+  const prev = () => {
+    setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+  };
+
+  return (
+    <section id="reviews" className="py-20 border-b border-[var(--border-subtle)]">
+      <div className="max-w-5xl mx-auto px-6">
+        <SectionHeader number="6" title="System Endorsements" />
+        
+        <div className="relative bg-[var(--bg-card)] border border-[var(--border-subtle)] p-8 md:p-12 rounded-xl overflow-hidden">
+            <div className="absolute top-6 left-6 text-[var(--border-subtle)] opacity-30">
+                <Quote size={64} />
+            </div>
+
+            <div className="relative z-10 min-h-[200px] flex flex-col justify-between">
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={currentIndex}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        transition={{ duration: 0.3 }}
+                        className="space-y-8"
+                    >
+                        <p className="text-xl md:text-2xl font-medium text-[var(--text-primary)] leading-relaxed max-w-3xl">
+                            "{testimonials[currentIndex].text}"
+                        </p>
+                        
+                        <div className="flex items-center gap-4 pt-6 border-t border-[var(--border-subtle)]">
+                            <div className="h-10 w-10 rounded-full bg-[var(--bg-primary)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-secondary)]">
+                                <span className="font-mono font-bold">{testimonials[currentIndex].author[0]}</span>
+                            </div>
+                            <div>
+                                <div className="font-bold text-[var(--text-primary)]">{testimonials[currentIndex].author}</div>
+                                <div className="font-mono text-xs text-[var(--text-secondary)]">
+                                    {testimonials[currentIndex].role} @ {testimonials[currentIndex].company}
+                                </div>
+                            </div>
+                        </div>
+                    </motion.div>
+                </AnimatePresence>
+
+                <div className="absolute bottom-8 right-8 flex gap-2">
+                    <button 
+                        onClick={prev}
+                        className="p-2 rounded-full border border-[var(--border-subtle)] hover:bg-[var(--bg-primary)] hover:border-[var(--accent-action)] transition-colors text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                    >
+                        <ChevronLeft size={20} />
+                    </button>
+                    <button 
+                        onClick={next}
+                        className="p-2 rounded-full border border-[var(--border-subtle)] hover:bg-[var(--bg-primary)] hover:border-[var(--accent-action)] transition-colors text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                    >
+                        <ChevronRight size={20} />
+                    </button>
+                </div>
+            </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
 const Contact = () => (
   <section id="connect" className="py-20">
     <div className="max-w-5xl mx-auto px-6">
-      <SectionHeader number="5" title="Open Ticket" />
+      <SectionHeader number="7" title="Open Ticket" />
       <div className="max-w-xl">
         <div className="p-6 border border-[var(--border-subtle)] bg-[var(--bg-card)]">
           <div className="flex items-center gap-2 mb-6 border-b border-[var(--border-subtle)] pb-4">
@@ -462,7 +752,9 @@ const CommandPalette = ({ isOpen, onClose }) => {
     { id: 'system', label: 'System Overview', href: '#system', icon: <Terminal size={14} /> },
     { id: 'logs', label: 'Changelog', href: '#logs', icon: <GitCommit size={14} /> },
     { id: 'rfc', label: 'Architecture Reviews', href: '#rfc', icon: <Cpu size={14} /> },
+    { id: 'metrics', label: 'Proficiency Metrics', href: '#metrics', icon: <Activity size={14} /> },
     { id: 'writing', label: 'Technical Writing', href: '#writing', icon: <Code2 size={14} /> },
+    { id: 'reviews', label: 'System Endorsements', href: '#reviews', icon: <MessageSquare size={14} /> },
     { id: 'connect', label: 'Open Ticket', href: '#connect', icon: <Mail size={14} /> },
   ];
 
@@ -501,8 +793,14 @@ const CommandPalette = ({ isOpen, onClose }) => {
               {filtered.map(action => (
                 <a
                   key={action.id}
-                  href={action.href}
-                  onClick={onClose}
+                  href={action.href || '#'}
+                  onClick={(e) => {
+                    if (action.onClick) {
+                      e.preventDefault();
+                      action.onClick();
+                    }
+                    onClose();
+                  }}
                   className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[var(--bg-primary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors group"
                 >
                   <div className="p-1.5 rounded bg-[var(--bg-primary)] border border-[var(--border-subtle)] group-hover:border-[var(--accent-action)] transition-colors">
@@ -535,8 +833,83 @@ const CommandPalette = ({ isOpen, onClose }) => {
   );
 };
 
+const ResumeModal = ({ isOpen, onClose }) => {
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[80]"
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="fixed inset-4 md:inset-10 bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-2xl rounded-xl overflow-hidden z-[90] flex flex-col"
+          >
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border-subtle)] bg-[var(--bg-primary)]">
+              <h3 className="font-mono text-sm font-bold flex items-center gap-2">
+                <FileText size={16} />
+                Semmozhiyan_Resume.pdf
+              </h3>
+              <div className="flex items-center gap-2">
+                <a 
+                  href="/Semmozhiyan_Resume.pdf" 
+                  download 
+                  className="p-2 hover:bg-[var(--bg-card)] rounded-md transition-colors text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                  title="Download PDF"
+                >
+                  <Download size={18} />
+                </a>
+                <button onClick={onClose} className="p-2 hover:bg-[var(--bg-card)] rounded-md transition-colors text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
+            <div className="flex-1 bg-gray-100 dark:bg-gray-900 relative">
+               <iframe src="/Semmozhiyan_Resume.pdf" className="w-full h-full" title="Resume PDF" />
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+};
+
+const FloatingResumeBtn = () => {
+  const { scrollY } = useScroll();
+  const [visible, setVisible] = React.useState(false);
+
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    setVisible(latest > 300);
+  });
+
+  return (
+    <AnimatePresence>
+      {visible && (
+        <motion.a
+          href="/Semmozhiyan_Resume.pdf"
+          download
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 20 }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="fixed bottom-8 right-24 z-50 flex items-center gap-2 px-4 py-3 bg-[var(--text-primary)] text-[var(--bg-primary)] rounded-full shadow-lg hover:shadow-xl transition-shadow border border-[var(--border-subtle)] font-mono text-xs font-bold"
+        >
+          <Download size={16} />
+          <span>RESUME</span>
+        </motion.a>
+      )}
+    </AnimatePresence>
+  );
+};
+
 const App = () => {
   const [isCmdOpen, setIsCmdOpen] = React.useState(false);
+  const [isResumeOpen, setIsResumeOpen] = React.useState(false);
 
   React.useEffect(() => {
     const handleKeyDown = (e) => {
@@ -561,8 +934,10 @@ const App = () => {
         <TechMarquee />
         <Changelog />
         <Skills />
+        <SkillsRadar />
         <Projects />
         <Blog />
+        <Testimonials />
         <Contact />
       </main>
       <SystemLogs />
@@ -576,7 +951,10 @@ const App = () => {
         <Command size={24} />
       </motion.button>
 
-      <CommandPalette isOpen={isCmdOpen} onClose={() => setIsCmdOpen(false)} />
+      <CommandPalette 
+        isOpen={isCmdOpen} 
+        onClose={() => setIsCmdOpen(false)} 
+      />
     </div>
   );
 };
