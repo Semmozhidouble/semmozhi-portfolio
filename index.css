@@ -1,0 +1,41 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-primary: #F9FAFB; /* Documentation paper white */
+  --bg-card: #FFFFFF;
+  --text-primary: #111827;
+  --text-secondary: #6B7280;
+  --border-subtle: #E5E7EB;
+  --accent-active: #10B981; /* Emerald for 'Running' */
+  --accent-action: #2563EB; /* Royal Blue for links */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #0D1117; /* GitHub Dimmed */
+    --bg-card: #0D1117;
+    --text-primary: #C9D1D9;
+    --text-secondary: #8B949E;
+    --border-subtle: #30363D;
+    --accent-active: #3FB950;
+    --accent-action: #58A6FF;
+  }
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Utility for the terminal feel */
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}

@@ -1,3 +1,157 @@
+
+// ==========================================================================
+// Advanced UI/UX Animations Module
+// ==========================================================================
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // 1. Inject Advanced UI Elements
+    const body = document.body;
+    
+    // Noise Overlay
+    const noise = document.createElement('div');
+    noise.classList.add('noise-overlay');
+    body.appendChild(noise);
+    
+    // Custom Cursor
+    if (window.innerWidth > 768) {
+        const cursor = document.createElement('div');
+        cursor.id = 'cursor';
+        const follower = document.createElement('div');
+        follower.id = 'cursor-follower';
+        body.appendChild(cursor);
+        body.appendChild(follower);
+        
+        // Cursor Logic
+        let posX = 0, posY = 0, mouseX = 0, mouseY = 0;
+        
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            
+            // Immediate update for main cursor
+            cursor.style.left = mouseX + 'px';
+            cursor.style.top = mouseY + 'px';
+        });
+        
+        // Smooth follower loop
+        setInterval(() => {
+            posX += (mouseX - posX) / 9;
+            posY += (mouseY - posY) / 9;
+            follower.style.left = posX + 'px';
+            follower.style.top = posY + 'px';
+        }, 16);
+        
+        // Hover States
+        const interactiveElements = document.querySelectorAll('a, button, .project-card, input, textarea');
+        interactiveElements.forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                cursor.classList.add('active');
+                follower.classList.add('active');
+            });
+            el.addEventListener('mouseleave', () => {
+                cursor.classList.remove('active');
+                follower.classList.remove('active');
+            });
+        });
+    }
+
+    // 2. 3D Tilt Effect
+    const tiltCards = document.querySelectorAll('.project-card, .skill-item, .about-card');
+    
+    tiltCards.forEach(card => {
+        card.classList.add('tilt-card'); // Mark for CSS styling
+        
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            const rotateX = ((y - centerY) / centerY) * -5; // Max 5deg rotation
+            const rotateY = ((x - centerX) / centerX) * 5;
+            
+            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+        });
+        
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
+        });
+    });
+
+    // 3. Text Scramble Effect (Cyberpunk Style)
+    class TextScramble {
+        constructor(el) {
+            this.el = el;
+            this.chars = '!<>-_\\/[]{}—=+*^?#________';
+            this.update = this.update.bind(this);
+        }
+        
+        setText(newText) {
+            const oldText = this.el.innerText;
+            const length = Math.max(oldText.length, newText.length);
+            const promise = new Promise((resolve) => this.resolve = resolve);
+            this.queue = [];
+            for (let i = 0; i < length; i++) {
+                const from = oldText[i] || '';
+                const to = newText[i] || '';
+                const start = Math.floor(Math.random() * 40);
+                const end = start + Math.floor(Math.random() * 40);
+                this.queue.push({ from, to, start, end });
+            }
+            cancelAnimationFrame(this.frameRequest);
+            this.frame = 0;
+            this.update();
+            return promise;
+        }
+        
+        update() {
+            let output = '';
+            let complete = 0;
+            for (let i = 0, n = this.queue.length; i < n; i++) {
+                let { from, to, start, end, char } = this.queue[i];
+                if (this.frame >= end) {
+                    complete++;
+                    output += to;
+                } else if (this.frame >= start) {
+                    if (!char || Math.random() < 0.28) {
+                        char = this.randomChar();
+                        this.queue[i].char = char;
+                    }
+                    output += `<span class="dud">${char}</span>`;
+                } else {
+                    output += from;
+                }
+            }
+            this.el.innerHTML = output;
+            if (complete === this.queue.length) {
+                this.resolve();
+            } else {
+                this.frameRequest = requestAnimationFrame(this.update);
+                this.frame++;
+            }
+        }
+        
+        randomChar() {
+            return this.chars[Math.floor(Math.random() * this.chars.length)];
+        }
+    }
+
+    // Apply Scramble to Titles
+    const titles = document.querySelectorAll('.hero-title, .section-title, .project-title');
+    titles.forEach(title => {
+        const fx = new TextScramble(title);
+        // Store original text
+        title.dataset.original = title.innerText;
+        
+        title.addEventListener('mouseenter', () => {
+            fx.setText(title.dataset.original);
+        });
+    });
+
+});
+
 // Mobile Navigation Toggle
 document.addEventListener('DOMContentLoaded', function() {
     // Mobile-specific optimizations
@@ -285,7 +439,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Enhanced scroll animations
     function initScrollAnimations() {
-        const animatedElements = document.querySelectorAll('.skill-item, .project-card, .about-text p');
+        const animatedElements = document.querySelectorAll('.skill-item, .project-card, .about-text p, .section-title, .stat-item, .featured-card, .contact-form, .hero-content, .tech-card, .fun-facts');
         
         animatedElements.forEach(el => {
             el.classList.add('fade-in');
