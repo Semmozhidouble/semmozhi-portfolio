@@ -93,7 +93,7 @@ const Hero = () => {
           </div>
 
           <div className="md:col-span-4 space-y-4">
-            <div className="p-4 border border-[var(--border-subtle)] rounded bg-[var(--bg-card)]">
+            <div className="p-4 border border-[var(--border-subtle)] rounded bg-white/50 dark:bg-[#0D1117]/50 backdrop-blur-md shadow-sm">
               <h3 className="font-mono text-xs text-[var(--text-secondary)] mb-3 uppercase">System Status</h3>
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
@@ -389,7 +389,7 @@ const ProjectCard = ({ id, title, stack, diff, link }) => (
     target="_blank"
     rel="noopener noreferrer"
     whileHover={{ y: -2 }}
-    className="block p-6 border border-[var(--border-subtle)] bg-[var(--bg-card)] hover:border-[var(--accent-action)] transition-all cursor-pointer group"
+    className="block p-6 border border-[var(--border-subtle)] bg-white/50 dark:bg-[#0D1117]/50 backdrop-blur-md hover:border-[var(--accent-action)] transition-all cursor-pointer group relative overflow-hidden shadow-sm"
   >
     <div className="flex justify-between items-start mb-4">
       <span className="font-mono text-xs text-[var(--text-secondary)]">{id}</span>
@@ -577,7 +577,7 @@ const Testimonials = () => {
       <div className="max-w-5xl mx-auto px-6">
         <SectionHeader number="6" title="System Endorsements" />
         
-        <div className="relative bg-[var(--bg-card)] border border-[var(--border-subtle)] p-8 md:p-12 rounded-xl overflow-hidden">
+        <div className="relative bg-white/50 dark:bg-[#0D1117]/50 backdrop-blur-md border border-[var(--border-subtle)] p-8 md:p-12 rounded-xl overflow-hidden shadow-sm">
             <div className="absolute top-6 left-6 text-[var(--border-subtle)] opacity-30">
                 <Quote size={64} />
             </div>
@@ -927,34 +927,55 @@ const App = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] selection:bg-[var(--accent-action)] selection:text-white">
-      <Navigation />
-      <main>
-        <Hero />
-        <TechMarquee />
-        <Changelog />
-        <Skills />
-        <SkillsRadar />
-        <Projects />
-        <Blog />
-        <Testimonials />
-        <Contact />
-      </main>
-      <SystemLogs />
+    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] selection:bg-[var(--accent-action)] selection:text-white relative overflow-hidden">
       
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={() => setIsCmdOpen(true)}
-        className="fixed bottom-8 right-8 z-50 p-4 bg-[var(--text-primary)] text-[var(--bg-primary)] rounded-full shadow-lg hover:shadow-xl transition-shadow border border-[var(--border-subtle)]"
-      >
-        <Command size={24} />
-      </motion.button>
+      {/* --- Advanced Background Layer --- */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        {/* Subtle Grid Pattern */}
+        <div 
+          className="absolute inset-0" 
+          style={{
+            backgroundImage: `linear-gradient(to right, var(--border-subtle) 1px, transparent 1px), linear-gradient(to bottom, var(--border-subtle) 1px, transparent 1px)`,
+            backgroundSize: '40px 40px',
+            opacity: 0.25
+          }} 
+        />
+        
+        {/* Ambient Glow Spots */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[var(--accent-action)] opacity-[0.08] blur-[120px] rounded-full pointer-events-none" />
+        <div className="absolute bottom-0 right-0 w-[600px] h-[400px] bg-[var(--accent-active)] opacity-[0.05] blur-[120px] rounded-full pointer-events-none" />
+      </div>
 
-      <CommandPalette 
-        isOpen={isCmdOpen} 
-        onClose={() => setIsCmdOpen(false)} 
-      />
+      {/* --- Content Layer --- */}
+      <div className="relative z-10">
+        <Navigation />
+        <main>
+          <Hero />
+          <TechMarquee />
+          <Changelog />
+          <Skills />
+          <SkillsRadar />
+          <Projects />
+          <Blog />
+          <Testimonials />
+          <Contact />
+        </main>
+        <SystemLogs />
+        
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setIsCmdOpen(true)}
+          className="fixed bottom-8 right-8 z-50 p-4 bg-[var(--text-primary)] text-[var(--bg-primary)] rounded-full shadow-lg hover:shadow-xl transition-shadow border border-[var(--border-subtle)]"
+        >
+          <Command size={24} />
+        </motion.button>
+
+        <CommandPalette 
+          isOpen={isCmdOpen} 
+          onClose={() => setIsCmdOpen(false)} 
+        />
+      </div>
     </div>
   );
 };
