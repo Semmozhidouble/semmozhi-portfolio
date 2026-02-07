@@ -1,6 +1,6 @@
 import React from 'react';
-import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
-import { Github, Linkedin, Mail, ArrowUpRight, Terminal, Server, Database, Layout, GitCommit, Activity, Box, Code2, Cpu, Layers, Command, Search, X, ChevronLeft, ChevronRight, Quote, MessageSquare, FileText, Download } from 'lucide-react';
+import { motion, AnimatePresence, useScroll, useMotionValueEvent, useSpring, useTransform, useMotionValue, useMotionTemplate } from 'framer-motion';
+import { Github, Linkedin, Mail, ArrowUpRight, Terminal, Server, Database, Layout, GitCommit, Activity, Box, Code2, Cpu, Layers, Command, Search, X, FileText, Download, Copy, Check } from 'lucide-react';
 
 // --- Design System Components ---
 
@@ -26,6 +26,70 @@ const StatusBadge = ({ status }) => {
   );
 };
 
+const ScrollProgress = () => {
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  });
+
+  return (
+    <motion.div
+      className="fixed top-0 left-0 right-0 h-1 bg-[var(--accent-action)] origin-left z-[100]"
+      style={{ scaleX }}
+    />
+  );
+};
+
+const CodeSnippet = ({ code, language = 'javascript', filename }) => {
+  const [copied, setCopied] = React.useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  // Simple syntax highlighting (for display purposes only)
+  const highlightedCode = React.useMemo(() => {
+    let html = code
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+
+    // Strings
+    html = html.replace(/(".*?"|'.*?'|`.*?`)/g, '<span class="text-emerald-400">$1</span>');
+    // Keywords
+    html = html.replace(/\b(import|export|default|const|let|var|function|return|if|else|for|while|class|extends|from|async|await)\b/g, '<span class="text-purple-400">$1</span>');
+    // Functions/Hooks
+    html = html.replace(/\b(useState|useEffect|useMemo|useCallback|React|useFetch)\b/g, '<span class="text-yellow-400">$1</span>');
+    // Comments
+    html = html.replace(/(\/\/.*)/g, '<span class="text-gray-500 italic">$1</span>');
+
+    return html;
+  }, [code]);
+
+  return (
+    <div className="rounded-lg overflow-hidden border border-[var(--border-subtle)] bg-[#0D1117] text-sm font-mono shadow-lg my-6 relative group">
+      <div className="flex items-center justify-between px-4 py-2 bg-[#161b22] border-b border-[var(--border-subtle)]">
+        <div className="flex items-center gap-2">
+          <div className="flex gap-1.5">
+            <div className="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/50" />
+            <div className="w-3 h-3 rounded-full bg-yellow-500/20 border border-yellow-500/50" />
+            <div className="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/50" />
+          </div>
+          {filename && <span className="ml-2 text-xs text-gray-400">{filename}</span>}
+        </div>
+        <button onClick={handleCopy} className="text-gray-400 hover:text-white transition-colors" title="Copy code">
+          {copied ? <Check size={14} className="text-green-400" /> : <Copy size={14} />}
+        </button>
+      </div>
+      <div className="p-4 overflow-x-auto"><pre><code dangerouslySetInnerHTML={{ __html: highlightedCode }} className="text-gray-300" /></pre></div>
+    </div>
+  );
+};
+
 // --- Sections ---
 
 const Navigation = () => (
@@ -37,7 +101,7 @@ const Navigation = () => (
         <span className="text-[var(--text-primary)]">portfolio</span>
       </div>
       <div className="flex gap-6">
-        {['system', 'logs', 'metrics', 'rfc', 'writing', 'reviews', 'connect'].map((item) => (
+        {['system', 'logs', 'metrics', 'rfc', 'code', 'connect'].map((item) => (
           <a key={item} href={`#${item}`} className="hover:text-[var(--accent-action)] transition-colors">
             {item}
           </a>
@@ -54,8 +118,9 @@ const Hero = () => {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-12">
           <div className="md:col-span-8">
             <motion.div 
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
               className="mb-6"
             >
               <h1 className="text-5xl font-bold tracking-tight text-[var(--text-primary)] mb-2">
@@ -64,19 +129,36 @@ const Hero = () => {
               <p className="font-mono text-[var(--text-secondary)]">JAVA_DEVELOPER :: DEVOPS_ENGINEER</p>
             </motion.div>
 
-            <div className="p-6 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-lg font-mono text-sm mb-8">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+              className="p-6 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-lg font-mono text-sm mb-8"
+            >
               <div className="flex items-center gap-2 text-[var(--text-secondary)] mb-4 border-b border-[var(--border-subtle)] pb-2">
                 <Terminal size={14} />
                 <span>bio.txt</span>
               </div>
               <p className="leading-relaxed text-[var(--text-primary)]">
-                <span className="text-[var(--accent-action)]">&gt;</span> Aspiring DevOps Engineer & Java Developer.<br/>
-                <span className="text-[var(--accent-action)]">&gt;</span> Stack: Java, Python, AWS, Jenkins, Kubernetes, Linux, Docker.<br/>
-                <span className="text-[var(--accent-action)]">&gt;</span> Focused on automation and scalable infrastructure.
+                <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
+                  <span className="text-[var(--accent-action)]">&gt;</span> Aspiring DevOps Engineer & Java Developer.<br/>
+                </motion.span>
+                <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }}>
+                  <span className="text-[var(--accent-action)]">&gt;</span> Stack: Java, Python, AWS, Jenkins, Kubernetes, Linux, Docker.<br/>
+                </motion.span>
+                <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.9 }}>
+                  <span className="text-[var(--accent-action)]">&gt;</span> Focused on automation and scalable infrastructure.
+                  <motion.span animate={{ opacity: [0, 1, 0] }} transition={{ repeat: Infinity, duration: 0.8 }} className="inline-block w-2 h-4 bg-[var(--accent-action)] ml-1 align-middle" />
+                </motion.span>
               </p>
-            </div>
+            </motion.div>
 
-            <div className="flex flex-wrap gap-4">
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 2.5 }}
+              className="flex flex-wrap gap-4"
+            >
               <a href="https://github.com/Semmozhidouble" className="flex items-center gap-2 px-4 py-2 border border-[var(--border-subtle)] text-[var(--text-primary)] rounded text-sm font-medium hover:bg-[var(--border-subtle)] transition-colors">
                 <Github size={16} />
                 GitHub
@@ -89,11 +171,16 @@ const Hero = () => {
                 <Mail size={16} />
                 Email
               </a>
-            </div>
+            </motion.div>
           </div>
 
           <div className="md:col-span-4 space-y-4">
-            <div className="p-4 border border-[var(--border-subtle)] rounded bg-white/50 dark:bg-[#0D1117]/50 backdrop-blur-md shadow-sm">
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.8, duration: 0.6 }}
+              className="p-4 border border-[var(--border-subtle)] rounded bg-white/50 dark:bg-[#0D1117]/50 backdrop-blur-md shadow-sm"
+            >
               <h3 className="font-mono text-xs text-[var(--text-secondary)] mb-3 uppercase">System Status</h3>
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
@@ -109,7 +196,7 @@ const Hero = () => {
                   <span className="font-mono text-xs">5 YEARS</span>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </div>
@@ -163,18 +250,28 @@ const Changelog = () => {
     <section id="logs" className="py-20 border-b border-[var(--border-subtle)]">
       <div className="max-w-5xl mx-auto px-6">
         <SectionHeader number="1" title="Changelog" />
-        <div className="relative border-l border-[var(--border-subtle)] ml-3 space-y-12">
+        <motion.div 
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+          variants={{ visible: { transition: { staggerChildren: 0.2 } } }}
+          className="relative border-l border-[var(--border-subtle)] ml-3 space-y-12"
+        >
           {logs.map((log, i) => (
-            <div key={i} className="relative pl-8">
+            <motion.div 
+              key={i} 
+              variants={{ hidden: { opacity: 0, x: -20 }, visible: { opacity: 1, x: 0 } }}
+              className="relative pl-8"
+            >
               <div className="absolute -left-[5px] top-2 w-2.5 h-2.5 rounded-full bg-[var(--bg-primary)] border border-[var(--text-secondary)]" />
               <div className="flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-4 mb-1">
                 <span className="font-mono text-xs text-[var(--accent-action)]">{log.version}</span>
                 <h3 className="font-bold text-[var(--text-primary)]">{log.title}</h3>
               </div>
               <p className="text-[var(--text-secondary)] max-w-xl">{log.desc}</p>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );
@@ -183,17 +280,23 @@ const Changelog = () => {
 const StackLayer = ({ title, items }) => (
   <div className="mb-8">
     <h3 className="font-mono text-xs text-[var(--text-secondary)] mb-4 uppercase tracking-wider">{title}</h3>
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+    <motion.div 
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true }}
+      variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
+      className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"
+    >
       {items.map((item, i) => (
-        <div key={i} className="p-4 border border-[var(--border-subtle)] bg-[var(--bg-card)] hover:border-[var(--accent-action)] transition-colors group">
+        <motion.div variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }} key={i} className="p-4 border border-[var(--border-subtle)] bg-[var(--bg-card)] hover:border-[var(--accent-action)] transition-colors group">
           <div className="flex items-center gap-2 mb-2">
             {item.icon}
             <span className="font-medium">{item.name}</span>
           </div>
           <p className="text-xs text-[var(--text-secondary)] leading-relaxed">{item.desc}</p>
-        </div>
+        </motion.div>
       ))}
-    </div>
+    </motion.div>
   </div>
 );
 
@@ -383,11 +486,12 @@ const SkillsRadar = () => {
   );
 };
 
-const ProjectCard = ({ id, title, stack, diff, link }) => (
+const ProjectCard = ({ id, title, stack, diff, link, variants }) => (
   <motion.a 
     href={link}
     target="_blank"
     rel="noopener noreferrer"
+    variants={variants}
     whileHover={{ y: -2 }}
     className="block p-6 border border-[var(--border-subtle)] bg-white/50 dark:bg-[#0D1117]/50 backdrop-blur-md hover:border-[var(--accent-action)] transition-all cursor-pointer group relative overflow-hidden shadow-sm"
   >
@@ -466,74 +570,64 @@ const Projects = () => {
     <section id="rfc" className="py-20 border-b border-[var(--border-subtle)]">
       <div className="max-w-5xl mx-auto px-6">
         <SectionHeader number="4" title="Architecture Reviews (RFCs)" />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <motion.div 
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
+          variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
+          className="grid grid-cols-1 md:grid-cols-2 gap-6"
+        >
           {projects.map((p, i) => (
-            <ProjectCard key={i} {...p} />
+            <ProjectCard key={i} {...p} variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }} />
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );
 };
 
-const Blog = () => {
-  const posts = [
-    {
-      title: 'Understanding React Server Components',
-      date: '2024-03-10',
-      readTime: '5 min',
-      tags: ['React', 'Architecture'],
-      link: '#'
-    },
-    {
-      title: 'System Design: Scaling WebSockets',
-      date: '2024-02-15',
-      readTime: '8 min',
-      tags: ['System Design', 'Node.js'],
-      link: '#'
-    },
-    {
-      title: 'Effective Monorepo Strategies',
-      date: '2024-01-20',
-      readTime: '6 min',
-      tags: ['DevOps', 'Tooling'],
-      link: '#'
-    }
-  ];
+const CodeShowcase = () => {
+  const exampleCode = `// Custom hook for fetching data
+import { useState, useEffect } from 'react';
+
+export const useFetch = (url) => {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(url);
+        const json = await response.json();
+        setData(json);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [url]);
+
+  return { data, loading };
+};`;
 
   return (
-    <section id="writing" className="py-20 border-b border-[var(--border-subtle)]">
+    <section id="code" className="py-20 border-b border-[var(--border-subtle)]">
       <div className="max-w-5xl mx-auto px-6">
-        <SectionHeader number="5" title="Technical Writing" />
-        <div className="space-y-1">
-          {posts.map((post, i) => (
-            <a 
-              key={i} 
-              href={post.link}
-              className="group flex flex-col sm:flex-row sm:items-center justify-between py-4 px-4 -mx-4 rounded hover:bg-[var(--bg-card)] border border-transparent hover:border-[var(--border-subtle)] transition-all"
-            >
-              <div className="flex flex-col gap-1">
-                <h3 className="font-medium text-[var(--text-primary)] group-hover:text-[var(--accent-action)] transition-colors">
-                  {post.title}
-                </h3>
-                <div className="flex items-center gap-3 text-xs font-mono text-[var(--text-secondary)]">
-                  <span>{post.date}</span>
-                  <span>•</span>
-                  <span>{post.readTime}</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 mt-3 sm:mt-0">
-                <div className="flex gap-2">
-                  {post.tags.map(tag => (
-                    <span key={tag} className="px-1.5 py-0.5 bg-[var(--bg-primary)] border border-[var(--border-subtle)] text-[10px] font-mono text-[var(--text-secondary)]">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-                <ArrowUpRight size={14} className="text-[var(--text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-            </a>
-          ))}
+        <SectionHeader number="5" title="Code Style" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
+            <h3 className="text-2xl font-bold mb-4 text-[var(--text-primary)]">Clean, Modular, & Type-Safe</h3>
+            <p className="text-[var(--text-secondary)] leading-relaxed mb-6">I prioritize readability and maintainability. My code follows modern best practices, utilizing custom hooks for logic separation and strong typing for reliability.</p>
+            <ul className="space-y-2 text-[var(--text-secondary)] font-mono text-sm">
+              <li className="flex items-center gap-2"><span className="text-[var(--accent-active)]">✓</span> Functional Composition</li>
+              <li className="flex items-center gap-2"><span className="text-[var(--accent-active)]">✓</span> Custom Hooks Pattern</li>
+              <li className="flex items-center gap-2"><span className="text-[var(--accent-active)]">✓</span> Declarative UI</li>
+            </ul>
+          </motion.div>
+          <motion.div initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}><CodeSnippet code={exampleCode} filename="useFetch.js" /></motion.div>
         </div>
       </div>
     </section>
@@ -575,7 +669,7 @@ const Testimonials = () => {
   return (
     <section id="reviews" className="py-20 border-b border-[var(--border-subtle)]">
       <div className="max-w-5xl mx-auto px-6">
-        <SectionHeader number="6" title="System Endorsements" />
+        <SectionHeader number="7" title="System Endorsements" />
         
         <div className="relative bg-white/50 dark:bg-[#0D1117]/50 backdrop-blur-md border border-[var(--border-subtle)] p-8 md:p-12 rounded-xl overflow-hidden shadow-sm">
             <div className="absolute top-6 left-6 text-[var(--border-subtle)] opacity-30">
@@ -634,7 +728,7 @@ const Testimonials = () => {
 const Contact = () => (
   <section id="connect" className="py-20">
     <div className="max-w-5xl mx-auto px-6">
-      <SectionHeader number="7" title="Open Ticket" />
+      <SectionHeader number="6" title="Open Ticket" />
       <div className="max-w-xl">
         <div className="p-6 border border-[var(--border-subtle)] bg-[var(--bg-card)]">
           <div className="flex items-center gap-2 mb-6 border-b border-[var(--border-subtle)] pb-4">
@@ -753,8 +847,7 @@ const CommandPalette = ({ isOpen, onClose }) => {
     { id: 'logs', label: 'Changelog', href: '#logs', icon: <GitCommit size={14} /> },
     { id: 'rfc', label: 'Architecture Reviews', href: '#rfc', icon: <Cpu size={14} /> },
     { id: 'metrics', label: 'Proficiency Metrics', href: '#metrics', icon: <Activity size={14} /> },
-    { id: 'writing', label: 'Technical Writing', href: '#writing', icon: <Code2 size={14} /> },
-    { id: 'reviews', label: 'System Endorsements', href: '#reviews', icon: <MessageSquare size={14} /> },
+    { id: 'code', label: 'Code Style', href: '#code', icon: <Code2 size={14} /> },
     { id: 'connect', label: 'Open Ticket', href: '#connect', icon: <Mail size={14} /> },
   ];
 
@@ -910,6 +1003,18 @@ const FloatingResumeBtn = () => {
 const App = () => {
   const [isCmdOpen, setIsCmdOpen] = React.useState(false);
   const [isResumeOpen, setIsResumeOpen] = React.useState(false);
+  
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  React.useEffect(() => {
+    const handleMouseMove = ({ clientX, clientY }) => {
+      mouseX.set(clientX);
+      mouseY.set(clientY);
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
 
   React.useEffect(() => {
     const handleKeyDown = (e) => {
@@ -928,22 +1033,70 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] selection:bg-[var(--accent-action)] selection:text-white relative overflow-hidden">
+      <ScrollProgress />
       
       {/* --- Advanced Background Layer --- */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        {/* Subtle Grid Pattern */}
+        {/* Noise Texture */}
+        <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay" 
+             style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }} 
+        />
+
+        {/* Subtle Grid Pattern with Radial Mask */}
         <div 
           className="absolute inset-0" 
           style={{
             backgroundImage: `linear-gradient(to right, var(--border-subtle) 1px, transparent 1px), linear-gradient(to bottom, var(--border-subtle) 1px, transparent 1px)`,
             backgroundSize: '40px 40px',
-            opacity: 0.25
+            opacity: 0.3,
+            maskImage: 'radial-gradient(circle at 50% 0%, black 40%, transparent 100%)',
+            WebkitMaskImage: 'radial-gradient(circle at 50% 0%, black 40%, transparent 100%)'
           }} 
         />
         
-        {/* Ambient Glow Spots */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[var(--accent-action)] opacity-[0.08] blur-[120px] rounded-full pointer-events-none" />
-        <div className="absolute bottom-0 right-0 w-[600px] h-[400px] bg-[var(--accent-active)] opacity-[0.05] blur-[120px] rounded-full pointer-events-none" />
+        {/* Mouse Spotlight Grid */}
+        <motion.div 
+          className="absolute inset-0" 
+          style={{
+            backgroundImage: `linear-gradient(to right, var(--accent-action) 1px, transparent 1px), linear-gradient(to bottom, var(--accent-action) 1px, transparent 1px)`,
+            backgroundSize: '40px 40px',
+            opacity: 0.15,
+            maskImage: useMotionTemplate`radial-gradient(300px circle at ${mouseX}px ${mouseY}px, black, transparent)`,
+            WebkitMaskImage: useMotionTemplate`radial-gradient(300px circle at ${mouseX}px ${mouseY}px, black, transparent)`,
+          }} 
+        />
+        
+        {/* Ambient Glow Spots - Enhanced */}
+        <motion.div 
+          className="absolute -top-[20%] left-[10%] w-[60vw] h-[60vw] bg-[var(--accent-action)] opacity-[0.06] blur-[120px] rounded-full pointer-events-none" 
+          animate={{ 
+            scale: [1, 1.1, 1], 
+            opacity: [0.06, 0.09, 0.06],
+            x: [0, 50, 0],
+            y: [0, 30, 0]
+          }}
+          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div 
+          className="absolute top-[20%] right-[10%] w-[50vw] h-[50vw] bg-[var(--accent-active)] opacity-[0.04] blur-[120px] rounded-full pointer-events-none" 
+          animate={{ 
+            scale: [1, 1.2, 1], 
+            opacity: [0.04, 0.08, 0.04],
+            x: [0, -30, 0],
+            y: [0, 50, 0]
+          }}
+          transition={{ duration: 18, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+        />
+         <motion.div 
+          className="absolute -bottom-[20%] left-[30%] w-[40vw] h-[40vw] bg-indigo-500 opacity-[0.03] blur-[120px] rounded-full pointer-events-none" 
+          animate={{ 
+            scale: [1, 1.15, 1], 
+            opacity: [0.03, 0.06, 0.03],
+            x: [0, 40, 0],
+            y: [0, -40, 0]
+          }}
+          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+        />
       </div>
 
       {/* --- Content Layer --- */}
@@ -956,8 +1109,7 @@ const App = () => {
           <Skills />
           <SkillsRadar />
           <Projects />
-          <Blog />
-          <Testimonials />
+          <CodeShowcase />
           <Contact />
         </main>
         <SystemLogs />
