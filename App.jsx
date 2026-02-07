@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence, useScroll, useMotionValueEvent, useSpring, useTransform, useMotionValue, useMotionTemplate } from 'framer-motion';
 import { Github, Linkedin, Mail, ArrowUpRight, Terminal, Server, Database, Layout, GitCommit, Activity, Box, Code2, Cpu, Layers, Command, Search, X, FileText, Download, Copy, Check } from 'lucide-react';
+import profileImg from './semmozhi.jpeg';
 
 // --- Design System Components ---
 
@@ -123,6 +124,25 @@ const Hero = () => {
               transition={{ duration: 0.6, ease: "easeOut" }}
               className="mb-6"
             >
+              <div className="relative inline-block mb-6 group cursor-pointer">
+                <motion.img 
+                  whileHover={{ scale: 1.05 }}
+                  src={profileImg}
+                  onError={(e) => { e.target.onerror = null; e.target.src = "https://github.com/Semmozhidouble.png"; }}
+                  alt="Profile" 
+                  className="w-24 h-24 rounded-full border border-[var(--border-subtle)] shadow-sm object-cover"
+                />
+                <div className="absolute bottom-1 right-1 w-5 h-5 bg-[var(--bg-card)] rounded-full flex items-center justify-center border border-[var(--border-subtle)] z-10">
+                   <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse" />
+                </div>
+                
+                <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-y-0 translate-y-[-5px]">
+                  <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] px-3 py-1.5 rounded-full shadow-xl whitespace-nowrap flex items-center gap-2">
+                    <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                    <span className="text-[10px] font-mono font-bold text-[var(--text-primary)]">HIRE ME</span>
+                  </div>
+                </div>
+              </div>
               <h1 className="text-5xl font-bold tracking-tight text-[var(--text-primary)] mb-2">
                 SEMMOZHIYAN
               </h1>
